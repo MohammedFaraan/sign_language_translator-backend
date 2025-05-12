@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ISL API Testing</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .section {
+        background-color: #f5f5f5;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .response {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-height: 50px;
+      }
+      .tabs {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+        border-radius: 5px 5px 0 0;
+      }
+      .tab-button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        color: black;
+      }
+      .tab-button:hover {
+        background-color: #ddd;
+      }
+      .tab-button.active {
+        background-color: #4caf50;
+        color: white;
+      }
+      .tab-content {
+        display: none;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+      }
+      .video-preview {
+        max-width: 100%;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ISL API Testing Interface</h1>
+
+    <div class="tabs">
+      <button
+        class="tab-button active"
+        onclick="openTab(event, 'englishToISL')"
+      >
+        English to ISL
+      </button>
+      <button class="tab-button" onclick="openTab(event, 'islToEnglish')">
+        ISL to English
+      </button>
+      <button class="tab-button" onclick="openTab(event, 'videoProcessing')">
+        Video Processing
+      </button>
+      <button class="tab-button" onclick="openTab(event, 'liveCapture')">
+        Live Capture
+      </button>
+    </div>
+
+    <div id="englishToISL" class="tab-content" style="display: block">
+      <div class="section">
+        <h2>English to ISL Gloss</h2>
+        <div class="form-group">
+          <label for="englishText">Enter English Text:</label>
+          <textarea
+            id="englishText"
+            rows="4"
+            placeholder="Enter English sentence here..."
+          ></textarea>
+        </div>
+        <button onclick="processEnglishToISL()">Convert to ISL</button>
+        <div class="response" id="islResponse">
+          <p>ISL gloss will appear here...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="islToEnglish" class="tab-content">
+      <div class="section">
+        <h2>ISL Gloss to English</h2>
+        <div class="form-group">
+          <label for="islGloss">Enter ISL Gloss:</label>
+          <textarea
+            id="islGloss"
+            rows="4"
+            placeholder="Enter ISL gloss here..."
+          ></textarea>
+        </div>
+        <button onclick="processISLToEnglish()">Convert to English</button>
+        <div class="response" id="englishResponse">
+          <p>English translation will appear here...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="videoProcessing" class="tab-content">
+      <div class="section">
+        <h2>Video Processing</h2>
+        <div class="form-group">
+          <label for="videoUpload">Upload Video:</label>
+          <input
+            type="file"
+            id="videoUpload"
+            accept="video/mp4,video/avi,video/mov,video/webm"
+          />
+        </div>
+        <div class="form-group">
+          <video
+            id="videoPreview"
+            class="video-preview"
+            controls
+            style="display: none"
+          ></video>
+        </div>
+        <button onclick="processVideo()">Process Video</button>
+        <div class="response" id="videoResponse">
+          <p>Video analysis results will appear here...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="liveCapture" class="tab-content">
+      <div class="section">
+        <h2>Live Capture</h2>
+        <p>
+          Note: This feature starts the webcam on the server, not your local
+          webcam.
+        </p>
+        <button onclick="startLiveCapture()">
+          Start Live Capture on Server
+        </button>
+        <div class="response" id="liveCaptureResponse">
+          <p>Live capture results will appear here...</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openTab(evt, tabName) {
+        var i, tabContent, tabButtons;
+
+        tabContent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabContent.length; i++) {
+          tabContent[i].style.display = "none";
+        }
+
+        tabButtons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabButtons.length; i++) {
+          tabButtons[i].className = tabButtons[i].className.replace(
+            " active",
+            ""
+          );
+        }
+
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+      }
+
+      function processEnglishToISL() {
+        const englishText = document.getElementById("englishText").value;
+        if (!englishText) {
+          alert("Please enter English text");
+          return;
+        }
+
+        document.getElementById("islResponse").innerHTML =
+          "<p>Processing...</p>";
+
+        fetch("/api/isl", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sentence: englishText }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              document.getElementById(
+                "islResponse"
+              ).innerHTML = `<p style="color:red">Error: ${data.error}</p>`;
+            } else {
+              document.getElementById("islResponse").innerHTML = `
+                        <p><strong>ISL Gloss:</strong> ${data.isl_gloss}</p>
+                    `;
+            }
+          })
+          .catch((error) => {
+            document.getElementById(
+              "islResponse"
+            ).innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+          });
+      }
+
+      function processISLToEnglish() {
+        const islGloss = document.getElementById("islGloss").value;
+        if (!islGloss) {
+          alert("Please enter ISL gloss");
+          return;
+        }
+
+        document.getElementById("englishResponse").innerHTML =
+          "<p>Processing...</p>";
+
+        fetch("/api/english", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ gloss: islGloss }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              document.getElementById(
+                "englishResponse"
+              ).innerHTML = `<p style="color:red">Error: ${data.error}</p>`;
+            } else {
+              document.getElementById("englishResponse").innerHTML = `
+                        <p><strong>English Translation:</strong> ${data.english_text}</p>
+                    `;
+            }
+          })
+          .catch((error) => {
+            document.getElementById(
+              "englishResponse"
+            ).innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+          });
+      }
+
+      // Preview uploaded video
+      document
+        .getElementById("videoUpload")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (file) {
+            const videoElement = document.getElementById("videoPreview");
+            videoElement.src = URL.createObjectURL(file);
+            videoElement.style.display = "block";
+          }
+        });
+
+      function processVideo() {
+        const fileInput = document.getElementById("videoUpload");
+        if (!fileInput.files || fileInput.files.length === 0) {
+          alert("Please select a video file");
+          return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append("video", file);
+
+        document.getElementById("videoResponse").innerHTML =
+          "<p>Processing... This may take a while depending on the video length.</p>";
+
+        fetch("/api/process-video", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              document.getElementById(
+                "videoResponse"
+              ).innerHTML = `<p style="color:red">Error: ${data.error}</p>`;
+            } else {
+              let signsHtml = "<ul>";
+              for (const [sign, count] of Object.entries(data.detected_signs)) {
+                signsHtml += `<li>${sign}: ${count} instances</li>`;
+              }
+              signsHtml += "</ul>";
+
+              document.getElementById("videoResponse").innerHTML = `
+                        <p><strong>Total Signs Detected:</strong> ${data.total_signs}</p>
+                        <p><strong>Unique Signs:</strong> ${data.unique_signs}</p>
+                        <p><strong>Detected Signs:</strong></p>
+                        ${signsHtml}
+                    `;
+            }
+          })
+          .catch((error) => {
+            document.getElementById(
+              "videoResponse"
+            ).innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+          });
+      }
+
+      function startLiveCapture() {
+        document.getElementById("liveCaptureResponse").innerHTML =
+          "<p>Starting live capture on server... This will open the webcam on the server, not your local webcam.</p>";
+
+        fetch("/api/live-capture")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              document.getElementById(
+                "liveCaptureResponse"
+              ).innerHTML = `<p style="color:red">Error: ${data.error}</p>`;
+            } else {
+              let signsHtml = "<ul>";
+              for (const [sign, count] of Object.entries(data.detected_signs)) {
+                signsHtml += `<li>${sign}: ${count} instances</li>`;
+              }
+              signsHtml += "</ul>";
+
+              document.getElementById("liveCaptureResponse").innerHTML = `
+                        <p><strong>Total Signs Detected:</strong> ${data.total_signs}</p>
+                        <p><strong>Unique Signs:</strong> ${data.unique_signs}</p>
+                        <p><strong>Detected Signs:</strong></p>
+                        ${signsHtml}
+                    `;
+            }
+          })
+          .catch((error) => {
+            document.getElementById(
+              "liveCaptureResponse"
+            ).innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+          });
+      }
+    </script>
+  </body>
+</html>
